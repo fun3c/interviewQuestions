@@ -14,14 +14,14 @@
 观察者模式也叫 ***发布者-订阅者模式***，发布者发布事件，订阅者监听事件并做出反应。
 
 ### 5. createContext
-**Context** 提供了一个无需为每层组件手动添加 `props`，就能在组件树间进行数据传递的方法。<br/>
-Context 设计目的是为了共享那些对于一个组件树而言是**全局**的数据，例如当前认证的用户、主题或首选语言。
+**Context** 提供了一个无需为每层组件手动添加 `props`，就能在组件树间进行数据传递的方法。Context 设计目的是为了共享那些对于一个组件树而言是**全局**的数据，例如当前认证的用户、主题或首选语言。
 ```js
 const MyContext = React.createContext(defaultValue);
 
 ```
 创建一个 Context 对象。当 React 渲染一个订阅了这个 Context 对象的组件，这个组件会从组件树中离自身最近的那个匹配的 Provider 中读取到当前的 context 值。
 只有当组件所处的树中没有匹配到 Provider 时，其 defaultValue 参数才会生效。
+
 ***MyContext.Provider***
 ```js
 <MyContext.Provider value={/* 某个值 */}>
