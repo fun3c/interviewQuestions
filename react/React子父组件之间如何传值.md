@@ -12,6 +12,49 @@
 
 ### 4. 观察者模式
 观察者模式也叫 ***发布者-订阅者模式***，发布者发布事件，订阅者监听事件并做出反应。
+```js
+class Parent extends Component{
+  render() {
+    return (
+      <div>
+        <Child_1/>
+        <Child_2/>
+      </div>
+    );
+  }
+}
+
+class Child_1 extends Component{
+  componentDidMount() {
+    setTimeout(() => {
+      // 发布 msg 事件
+      eventProxy.trigger('msg', 'end');
+    }, 1000);
+  }
+}
+
+class Child_2 extends Component{
+  state = {
+    msg: 'start'
+  };
+
+  componentDidMount() {
+  	// 监听 msg 事件
+    eventProxy.on('msg', (msg) => {
+      this.setState({
+        msg
+      });
+    });
+  }
+
+  render() {
+    return <div>
+      <p>child_2 component: {this.state.msg}</p>
+      <Child_2_1 />
+    </div>
+  }
+}
+```
 
 ### 5. createContext
 **Context** 提供了一个无需为每层组件手动添加 `props`，就能在组件树间进行数据传递的方法。Context 设计目的是为了共享那些对于一个组件树而言是**全局**的数据，例如当前认证的用户、主题或首选语言。
@@ -63,3 +106,88 @@ MyClass.contextType = MyContext;
 </MyContext.Consumer>
 ```
 这需要`函数作为子元素（function as a child）`这种做法。这个函数接收当前的 context 值，返回一个 React 节点。传递给函数的 value 值等同于往上组件树离这个 context 最近的 Provider 提供的 value 值。如果没有对应的 Provider，value 参数等同于传递给 createContext() 的 defaultValue。
+
+### 6. Flux 与 Redux
+Flux 作为 Facebook 发布的一种应用架构，他本身是一种模式，而不是一种框架，基于这个应用架构模式，在开源社区上产生了众多框架，其中最受欢迎的就是我们即将要说的 Redux。  
+
+Redux 是 JavaScript 状态容器，提供可预测化的状态管理。  
+
+Redux 三大原则：
+- 单一数据源  
+  整个应用中的`state`被储存在一个对象树中，并且这个对象树只存在于`store`中。  
+- State是只读的  
+  唯一改变 `state` 的方法就是触发 `action`，`action` 是一个用于描述已发生事件的普通对象。  
+- 使用纯函数来执行修改  
+  为了描述 `action` 如何改变 `state tree` ，你需要编写 `reducers`。`reducer` 只是一些纯函数，它接收先前的 `state` 和 `action`，并返回新的 `state`。  
+  
+  actions.js
+  ```js
+  // actions.js
+  export const increment = (num) => ({
+    type: 'INCREMENT',
+    num
+  });
+  export const decrement = (num) => ({
+    type: 'DECREMENT',
+    num
+  });
+  ```
+
+  reducer.js
+  ```js
+  // reducer.js
+  const reduce = (state, action) => {
+    switch(action.type) {
+      case 'INCREMENT':
+        return state.num + 1;
+      case 'DECREMENT':
+        return state.num - 1;
+      default:
+        return state;
+    }
+  }
+  ```
+
+  创建store
+  ```js
+  // store.js
+  import { createStore } from 'redux';
+  import reducer from './reducer';
+  
+  const store = ceeateStore(reducer);
+
+  //console.log(store.getState()) // 0
+
+  //stroe.dispatch({type: 'INCREMENT'});
+
+  //console.log(store.getState()) // 1
+  ```
+  view层
+  ```js
+  // ReduxCom.jsx
+  import React, { Component } from 'react';
+  import { connect } from 'react-redux';
+  import * as Actions from './action';
+
+  class ReduxCom extends Component {
+    render() {
+      const {num, increment, decrement} = this.props;
+      return (
+        <div>
+          <button onClick={increment}>+<button>: {num}
+          <button onClick={decrement}>-<button>: {num}
+        </div>
+      );
+    }
+  };
+  const mapStateToProps = (state) => ({
+    num: state.num
+  });
+  const mapDispatchToProps = (dispatch) => {
+    return {
+      increment: (num) => dispatch(Actions.increment(num)),
+      decrement: (num) => dispatch(Actions.decrement(num));
+    };
+  }
+  export default connect(mapStateToProps,mapDispatchToProps)(ReduxCom);
+  ```
